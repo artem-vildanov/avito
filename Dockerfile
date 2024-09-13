@@ -1,15 +1,23 @@
-FROM gradle:4.7.0-jdk8-alpine AS build
-COPY --chown=gradle:gradle . /home/gradle/src
-WORKDIR /home/gradle/src
-RUN gradle build --no-daemon 
+FROM golang:1.23.0-alpine AS builder
+WORKDIR /data
 
-FROM openjdk:8-jre-slim
+COPY go.mod go.mod
+RUN go mod download
 
-EXPOSE 8080
+COPY . .
+COPY .env .env
 
-RUN mkdir /app
+RUN go build \
+    -a \
+    -o avito \
+    ./cmd/main.go
 
-COPY --from=build /home/gradle/src/build/libs/*.jar /app/spring-boot-application.jar
+FROM alpine:latest
 
-ENTRYPOINT ["java", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseCGroupMemoryLimitForHeap", "-Djava.security.egd=file:/dev/./urandom","-jar","/app/spring-boot-application.jar"]
+WORKDIR /bin
 
+COPY --from=builder /data /bin
+#COPY --from=builder /data/avito /bin
+#COPY --from=builder /data/.env /bin
+
+ENTRYPOINT ["/bin/avito"]
