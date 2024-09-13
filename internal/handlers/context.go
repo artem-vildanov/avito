@@ -86,6 +86,22 @@ func (self Context) GetServiceTypesRequestParam() ([]enums.ServiceType, *errors.
 	return resultServiceTypes, nil
 }
 
+func (self Context) GetRequesterUsernameRequestParam() (string, *errors.AppError) {
+	requesterUsername := self.Request.URL.Query().Get("requesterUsername")
+	if requesterUsername == "" {
+		return "", errors.RequiredRequestParamNotProvided("requesterUsername")
+	}
+	return requesterUsername, nil
+}
+
+func (self Context) GetAuthorUsernameRequestParam() (string, *errors.AppError) {
+	authorUsername := self.Request.URL.Query().Get("authorUsername")
+	if authorUsername == "" {
+		return "", errors.RequiredRequestParamNotProvided("authorUsername")
+	}
+	return authorUsername, nil
+}
+
 func (self Context) GetBidFeedbackRequestParam() (string, *errors.AppError) {
 	bidFeedback := self.Request.URL.Query().Get("bidFeedback")
 	if bidFeedback == "" {

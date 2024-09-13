@@ -10,6 +10,10 @@ type AppError struct {
 	Code    int
 }
 
+type ErrorResponse struct {
+	Reason string `json:"reason"`
+}
+
 func (self AppError) Error() string {
 	return fmt.Sprintf("Error message: %s, Code: %d; \n", self.Message, self.Code)
 }

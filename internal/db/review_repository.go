@@ -16,10 +16,10 @@ func NewReviewRepository(storage *PostgresStorage) *ReviewRepository {
 func (self ReviewRepository) GetReviewsByBidsAuthorUsername(
 	username string,
 	limit,
-	offset int,
+	offset uint,
 ) ([]*models.ReviewDbModel, *errors.AppError) {
 	rows, err := self.Database.Query(
-		`SELECT * 
+		`SELECT review.id, review.bid_id, review.description, review.created_at 
 		FROM review
 		JOIN bid ON review.bid_id = bid.id
 		JOIN employee ON bid.author_id = employee.id

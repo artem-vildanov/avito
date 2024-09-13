@@ -8,6 +8,7 @@ import (
 
 type ReviewDbModel struct {
 	Id          string `json:"id"`
+	BidId       string `json:"bid_id"`
 	Description string `json:"description"`
 	CreatedAt   string `json:"created_at"`
 }
@@ -16,10 +17,12 @@ func NewReviewDbModel(row utils.Scannable, returnErr *errors.AppError) (*ReviewD
 	model := new(ReviewDbModel)
 	err := row.Scan(
 		&model.Id,
+		&model.BidId,
 		&model.Description,
 		&model.CreatedAt,
 	)
 	if err != nil {
+		println(err.Error())
 		return nil, returnErr
 	}
 	return model, nil
@@ -41,4 +44,20 @@ type ReviewDtoModel struct {
 	Id          string `json:"id"`
 	Description string `json:"description"`
 	CreatedAt   string `json:"createdAt"`
+}
+
+func NewReviewDtoModel(dbModel *ReviewDbModel) *ReviewDtoModel {
+	return &ReviewDtoModel{
+		Id:          dbModel.Id,
+		Description: dbModel.Description,
+		CreatedAt:   dbModel.CreatedAt,
+	}
+}
+
+func NewReviewDtoModelList(dbModels []*ReviewDbModel) []*ReviewDtoModel {
+	var models []*ReviewDtoModel
+	for _, model := range dbModels {
+		models = append(models, NewReviewDtoModel(model))
+	}
+	return models
 }

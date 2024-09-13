@@ -79,6 +79,24 @@ func (self EmployeeRepository) CheckEmployeeIsResponsible(username, organization
 	return nil
 }
 
+func (self EmployeeRepository) CheckEmployeeHasBidsForTender(employeeId, tenderId string) *errors.AppError {
+	var hasBids bool
+	err := self.Database.QueryRow(
+		`SELECT EXISTS (
+			SELECT 1 FROM bid WHERE author_id = $1 and tender_id = $2
+		)`,
+		employeeId,
+		tenderId,
+	).Scan(&hasBids)
+	if err != nil {
+		return errors.DatabaseError
+	}
+	if !hasBids {
+		return errors.NotEnoughPermissions(employeeId)
+	}
+	return nil
+}
+
 //func (self EmployeeRepository) GetEmployee(id int) *errors.AppError {
 //	return nil
 //}

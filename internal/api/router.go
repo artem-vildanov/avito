@@ -32,7 +32,7 @@ func (self Router) createRoute(path string, apiFunc apiFunc) *mux.Route {
 			context := handlers.NewContext(w, r)
 			if err := apiFunc(context); err != nil {
 				println(err.Error())
-				_ = context.RespondWithJson(err.Code, err.Message)
+				_ = context.RespondWithJson(err.Code, errors.ErrorResponse{Reason: err.Message})
 			}
 		},
 	)
