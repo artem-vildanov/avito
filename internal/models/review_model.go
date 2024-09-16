@@ -29,7 +29,7 @@ func NewReviewDbModel(row utils.Scannable, returnErr *errors.AppError) (*ReviewD
 }
 
 func NewReviewDbModelsList(rows *sql.Rows) ([]*ReviewDbModel, *errors.AppError) {
-	var models []*ReviewDbModel
+	models := make([]*ReviewDbModel, 0)
 	for rows.Next() {
 		model, err := NewReviewDbModel(rows, errors.DatabaseError)
 		if err != nil {
@@ -55,7 +55,7 @@ func NewReviewDtoModel(dbModel *ReviewDbModel) *ReviewDtoModel {
 }
 
 func NewReviewDtoModelList(dbModels []*ReviewDbModel) []*ReviewDtoModel {
-	var models []*ReviewDtoModel
+	models := make([]*ReviewDtoModel, 0)
 	for _, model := range dbModels {
 		models = append(models, NewReviewDtoModel(model))
 	}

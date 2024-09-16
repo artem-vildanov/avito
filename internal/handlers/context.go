@@ -38,72 +38,76 @@ func NewContext(responseWriter http.ResponseWriter, request *http.Request) *Cont
 	}
 }
 
-func (self Context) GetBidStatusRequestParam() (enums.BidStatus, *errors.AppError) {
-	statusFromReq := self.Request.URL.Query().Get("status")
+func (c Context) GetBidStatusRequestParam() (enums.BidStatus, *errors.AppError) {
+	statusFromReq := enums.BidStatus(c.Request.URL.Query().Get("status"))
 	if statusFromReq == "" {
 		return enums.BidStatusCanceled, errors.RequiredRequestParamNotProvided("status")
 	}
-	if !utils.Contains(enums.BidStatusesList, statusFromReq) {
-		return enums.BidStatusCanceled, errors.InvalidRequestParam(statusFromReq)
+
+	if !utils.Contains(enums.GetBidStatuses(), statusFromReq) {
+		return enums.BidStatusCanceled, errors.InvalidRequestParam(string(statusFromReq))
 	}
-	return enums.BidStatus(statusFromReq), nil
+
+	return statusFromReq, nil
 }
 
-func (self Context) GetTenderStatusRequestParam() (enums.TenderStatus, *errors.AppError) {
-	statusFromReq := self.Request.URL.Query().Get("status")
+func (c Context) GetTenderStatusRequestParam() (enums.TenderStatus, *errors.AppError) {
+	statusFromReq := enums.TenderStatus(c.Request.URL.Query().Get("status"))
 	if statusFromReq == "" {
 		return enums.TenderStatusClosed, errors.RequiredRequestParamNotProvided("status")
 	}
-	if !utils.Contains(enums.TenderStatusesList, statusFromReq) {
-		return enums.TenderStatusClosed, errors.InvalidRequestParam(statusFromReq)
+
+	if !utils.Contains(enums.GetTenderStatuses(), statusFromReq) {
+		return enums.TenderStatusClosed, errors.InvalidRequestParam(string(statusFromReq))
 	}
-	return enums.TenderStatus(statusFromReq), nil
+	return statusFromReq, nil
 }
 
-func (self Context) GetDecisionRequestParam() (enums.Decision, *errors.AppError) {
-	decisionFromReq := self.Request.URL.Query().Get("decision")
+func (c Context) GetDecisionRequestParam() (enums.Decision, *errors.AppError) {
+	decisionFromReq := enums.Decision(c.Request.URL.Query().Get("decision"))
 	if decisionFromReq == "" {
 		return enums.DecisionRejected, errors.RequiredRequestParamNotProvided("decision")
 	}
-	if !utils.Contains(enums.DecisionsList, decisionFromReq) {
-		return enums.DecisionRejected, errors.InvalidRequestParam(decisionFromReq)
+	if !utils.Contains(enums.GetDecisions(), decisionFromReq) {
+		return enums.DecisionRejected, errors.InvalidRequestParam(string(decisionFromReq))
 	}
-	return enums.Decision(decisionFromReq), nil
+	return decisionFromReq, nil
 }
 
-func (self Context) GetServiceTypesRequestParam() ([]enums.ServiceType, *errors.AppError) {
+func (c Context) GetServiceTypesRequestParam() ([]enums.ServiceType, *errors.AppError) {
 	resultServiceTypes := []enums.ServiceType{}
-	serviceTypesFromReq := self.Request.URL.Query()["service_type"]
+	serviceTypesFromReq := c.Request.URL.Query()["service_type"]
 
-	for _, reqServiceType := range serviceTypesFromReq {
-		if utils.Contains(enums.ServiceTypesList, reqServiceType) {
-			resultServiceTypes = append(resultServiceTypes, enums.ServiceType(reqServiceType))
+	for _, reqServiceTypeStr := range serviceTypesFromReq {
+		reqServiceType := enums.ServiceType(reqServiceTypeStr)
+		if utils.Contains(enums.GetServiceTypes(), reqServiceType) {
+			resultServiceTypes = append(resultServiceTypes, reqServiceType)
 		} else {
-			return resultServiceTypes, errors.InvalidRequestParam(reqServiceType)
+			return resultServiceTypes, errors.InvalidRequestParam(string(reqServiceType))
 		}
 	}
 
 	return resultServiceTypes, nil
 }
 
-func (self Context) GetRequesterUsernameRequestParam() (string, *errors.AppError) {
-	requesterUsername := self.Request.URL.Query().Get("requesterUsername")
+func (c Context) GetRequesterUsernameRequestParam() (string, *errors.AppError) {
+	requesterUsername := c.Request.URL.Query().Get("requesterUsername")
 	if requesterUsername == "" {
 		return "", errors.RequiredRequestParamNotProvided("requesterUsername")
 	}
 	return requesterUsername, nil
 }
 
-func (self Context) GetAuthorUsernameRequestParam() (string, *errors.AppError) {
-	authorUsername := self.Request.URL.Query().Get("authorUsername")
+func (c Context) GetAuthorUsernameRequestParam() (string, *errors.AppError) {
+	authorUsername := c.Request.URL.Query().Get("authorUsername")
 	if authorUsername == "" {
 		return "", errors.RequiredRequestParamNotProvided("authorUsername")
 	}
 	return authorUsername, nil
 }
 
-func (self Context) GetBidFeedbackRequestParam() (string, *errors.AppError) {
-	bidFeedback := self.Request.URL.Query().Get("bidFeedback")
+func (c Context) GetBidFeedbackRequestParam() (string, *errors.AppError) {
+	bidFeedback := c.Request.URL.Query().Get("bidFeedback")
 	if bidFeedback == "" {
 		return "", errors.RequiredRequestParamNotProvided("bidFeedback")
 	}
@@ -111,28 +115,28 @@ func (self Context) GetBidFeedbackRequestParam() (string, *errors.AppError) {
 }
 
 // GetUsernameRequestParam can be required
-func (self Context) GetUsernameRequestParam() (string, *errors.AppError) {
-	username := self.Request.URL.Query().Get("username")
+func (c Context) GetUsernameRequestParam() (string, *errors.AppError) {
+	username := c.Request.URL.Query().Get("username")
 	if username == "" {
 		return "", errors.RequiredRequestParamNotProvided("username")
 	}
 	return username, nil
 }
 
-func (self Context) GetLimitAndOffsetRequestParams() (uint, uint, *errors.AppError) {
-	limit, err := self.GetLimitRequestParam()
+func (c Context) GetLimitAndOffsetRequestParams() (uint, uint, *errors.AppError) {
+	limit, err := c.GetLimitRequestParam()
 	if err != nil {
 		return 0, 0, err
 	}
-	offset, err := self.GetOffsetRequestParam()
+	offset, err := c.GetOffsetRequestParam()
 	if err != nil {
 		return 0, 0, nil
 	}
 	return limit, offset, nil
 }
 
-func (self Context) GetLimitRequestParam() (uint, *errors.AppError) {
-	limitStr := self.Request.URL.Query().Get("limit")
+func (c Context) GetLimitRequestParam() (uint, *errors.AppError) {
+	limitStr := c.Request.URL.Query().Get("limit")
 	if limitStr == "" {
 		return LimitDefaultValue, nil
 	}
@@ -145,8 +149,8 @@ func (self Context) GetLimitRequestParam() (uint, *errors.AppError) {
 	return uint(limitInt), nil
 }
 
-func (self Context) GetOffsetRequestParam() (uint, *errors.AppError) {
-	offsetStr := self.Request.URL.Query().Get("offset")
+func (c Context) GetOffsetRequestParam() (uint, *errors.AppError) {
+	offsetStr := c.Request.URL.Query().Get("offset")
 	if offsetStr == "" {
 		return OffsetDefaultValue, nil
 	}
@@ -159,8 +163,8 @@ func (self Context) GetOffsetRequestParam() (uint, *errors.AppError) {
 	return uint(offsetInt), nil
 }
 
-func (self Context) GetVersionPathParam() (uint, *errors.AppError) {
-	versionStr, err := self.GetPathParam("version")
+func (c Context) GetVersionPathParam() (uint, *errors.AppError) {
+	versionStr, err := c.GetPathParam("version")
 	if err != nil {
 		return 0, err
 	}
@@ -172,17 +176,17 @@ func (self Context) GetVersionPathParam() (uint, *errors.AppError) {
 }
 
 // GetBidIdPathParam always required
-func (self Context) GetBidIdPathParam() (string, *errors.AppError) {
-	return self.GetPathParam("bidId")
+func (c Context) GetBidIdPathParam() (string, *errors.AppError) {
+	return c.GetPathParam("bidId")
 }
 
 // GetTenderIdPathParam always required
-func (self Context) GetTenderIdPathParam() (string, *errors.AppError) {
-	return self.GetPathParam("tenderId")
+func (c Context) GetTenderIdPathParam() (string, *errors.AppError) {
+	return c.GetPathParam("tenderId")
 }
 
-func (self Context) GetPathParam(paramKey string) (string, *errors.AppError) {
-	paramValue, exists := self.pathParams[paramKey]
+func (c Context) GetPathParam(paramKey string) (string, *errors.AppError) {
+	paramValue, exists := c.pathParams[paramKey]
 	if !exists {
 		return "", errors.RequiredRequestParamNotProvided(paramKey)
 	}
@@ -190,17 +194,17 @@ func (self Context) GetPathParam(paramKey string) (string, *errors.AppError) {
 	return paramValue, nil
 }
 
-func (self Context) RespondWithJson(status int, content any) *errors.AppError {
-	if err := self.writeJson(status, content); err != nil {
+func (c Context) RespondWithJson(status int, content any) *errors.AppError {
+	if err := c.writeJson(status, content); err != nil {
 		errMessage := fmt.Sprintf("json parse error: %s", err.Error())
 		log.Println(errMessage)
-		_ = self.writeJson(http.StatusInternalServerError, errMessage)
+		_ = c.writeJson(http.StatusInternalServerError, errMessage)
 	}
 	return nil
 }
 
-func (self Context) writeJson(status int, content any) error {
-	self.Response.Header().Set("Content-Type", "application/json")
-	self.Response.WriteHeader(int(status))
-	return json.NewEncoder(self.Response).Encode(content)
+func (c Context) writeJson(status int, content any) error {
+	c.Response.Header().Set("Content-Type", "application/json")
+	c.Response.WriteHeader(int(status))
+	return json.NewEncoder(c.Response).Encode(content)
 }

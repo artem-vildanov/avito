@@ -4,29 +4,26 @@ import (
 	"avito/internal/db"
 	"avito/internal/errors"
 	"avito/internal/models"
-	"avito/internal/services"
 	"net/http"
 )
 
 type ReviewHandler struct {
-	reviewRepos     *db.ReviewRepository
-	bidRepos        *db.BidRepository
-	employeeService *services.EmployeeService
-	tenderRepos     *db.TenderRepository
-	employeeRepos   *db.EmployeeRepository
+	reviewRepos   *db.ReviewRepository
+	bidRepos      *db.BidRepository
+	tenderRepos   *db.TenderRepository
+	employeeRepos *db.EmployeeRepository
 }
 
 func NewReviewHandler(storage *db.PostgresStorage) *ReviewHandler {
 	return &ReviewHandler{
-		reviewRepos:     db.NewReviewRepository(storage),
-		bidRepos:        db.NewBidRepository(storage),
-		employeeService: services.NewEmployeeService(storage),
-		employeeRepos:   db.NewEmployeeRepository(storage),
-		tenderRepos:     db.NewTenderRepository(storage),
+		reviewRepos:   db.NewReviewRepository(storage),
+		bidRepos:      db.NewBidRepository(storage),
+		employeeRepos: db.NewEmployeeRepository(storage),
+		tenderRepos:   db.NewTenderRepository(storage),
 	}
 }
 
-func (self ReviewHandler) LeaveFeedback(ctx *Context) *errors.AppError {
+func (r ReviewHandler) LeaveFeedback(ctx *Context) *errors.AppError {
 	bidId, err := ctx.GetBidIdPathParam()
 	if err != nil {
 		return err
@@ -42,21 +39,25 @@ func (self ReviewHandler) LeaveFeedback(ctx *Context) *errors.AppError {
 		return err
 	}
 
-	bidDbModel, err := self.bidRepos.GetBidById(bidId)
+	bidDbModel, err := r.bidRepos.GetBidById(bidId)
 	if err != nil {
 		return err
 	}
 
-	tenderDbModel, err := self.tenderRepos.GetTenderById(bidDbModel.TenderId)
+	tenderDbModel, err := r.tenderRepos.GetTenderById(bidDbModel.TenderId)
 	if err != nil {
 		return err
 	}
 
-	if err := self.employeeService.CheckEmployeeIsResponsible(username, tenderDbModel.OrganizationId); err != nil {
+	if err := r.employeeRepos.CheckEmployeeExistsByUsername(username); err != nil {
 		return err
 	}
 
-	_, err = self.reviewRepos.NewReview(bidId, bidFeedback)
+	if err := r.employeeRepos.CheckEmployeeIsResponsible(username, tenderDbModel.OrganizationId); err != nil {
+		return err
+	}
+
+	_, err = r.reviewRepos.NewReview(bidId, bidFeedback)
 	if err != nil {
 		return err
 	}
@@ -64,7 +65,7 @@ func (self ReviewHandler) LeaveFeedback(ctx *Context) *errors.AppError {
 	return ctx.RespondWithJson(http.StatusOK, models.NewBidDtoModel(bidDbModel))
 }
 
-func (self ReviewHandler) GetReviews(ctx *Context) *errors.AppError {
+func (r ReviewHandler) GetReviews(ctx *Context) *errors.AppError {
 	limit, offset, err := ctx.GetLimitAndOffsetRequestParams()
 	if err != nil {
 		return err
@@ -85,33 +86,33 @@ func (self ReviewHandler) GetReviews(ctx *Context) *errors.AppError {
 		return err
 	}
 
-	tenderDbModel, err := self.tenderRepos.GetTenderById(tenderId)
+	tenderDbModel, err := r.tenderRepos.GetTenderById(tenderId)
 	if err != nil {
 		return err
 	}
 
-	authorDbModel, err := self.employeeRepos.GetEmployeeByUsername(authorUsername)
+	authorDbModel, err := r.employeeRepos.GetEmployeeByUsername(authorUsername)
 	if err != nil {
 		return err
 	}
 
-	_, err = self.employeeRepos.GetEmployeeByUsername(requesterUsername)
+	_, err = r.employeeRepos.GetEmployeeByUsername(requesterUsername)
 	if err != nil {
 		return err
 	}
 
 	// проверка что запрашивающий ответственнен за оргу которая создала тендер
-	if err := self.employeeRepos.CheckEmployeeIsResponsible(requesterUsername, tenderDbModel.OrganizationId); err != nil {
+	if err := r.employeeRepos.CheckEmployeeIsResponsible(requesterUsername, tenderDbModel.OrganizationId); err != nil {
 		return err
 	}
 
 	// проверить что автор имеет предложение для тендера
-	if err := self.employeeRepos.CheckEmployeeHasBidsForTender(authorDbModel.Id, tenderId); err != nil {
+	if err := r.employeeRepos.CheckEmployeeHasBidsForTender(authorDbModel.Id, tenderId); err != nil {
 		return err
 	}
 
 	// если имеет, то найти все другие предложения автора
-	reviewsDbModels, err := self.reviewRepos.GetReviewsByBidsAuthorUsername(authorUsername, limit, offset)
+	reviewsDbModels, err := r.reviewRepos.GetReviewsByBidsAuthorUsername(authorUsername, limit, offset)
 	if err != nil {
 		return err
 	}

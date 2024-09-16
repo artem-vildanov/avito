@@ -17,7 +17,5 @@ FROM alpine:latest
 WORKDIR /bin
 
 COPY --from=builder /data /bin
-#COPY --from=builder /data/avito /bin
-#COPY --from=builder /data/.env /bin
 
 ENTRYPOINT ["/bin/avito"]

@@ -12,6 +12,12 @@ func BidNotFound(id string) *AppError {
 	}
 }
 
+func BidNotPublished(id string) *AppError {
+	return &AppError{
+		Message: fmt.Sprintf("Bid not published: %s, not enough permissions", id),
+	}
+}
+
 func BidRollbackNotFound(id string, version uint) *AppError {
 	return &AppError{
 		Message: fmt.Sprintf("Bid rollback not found: id: %s, version: %d", id, version),

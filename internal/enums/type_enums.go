@@ -16,10 +16,12 @@ const (
 	ServiceTypeManufacture  ServiceType = "Manufacture"
 )
 
-var ServiceTypesList = []string{
-	string(ServiceTypeDelivery),
-	string(ServiceTypeConstruction),
-	string(ServiceTypeManufacture),
+func GetServiceTypes() []ServiceType {
+	return []ServiceType{
+		ServiceTypeConstruction,
+		ServiceTypeDelivery,
+		ServiceTypeManufacture,
+	}
 }
 
 type AuthorType string

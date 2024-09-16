@@ -40,7 +40,7 @@ func NewTenderDbModel(row utils.Scannable, returnErr *errors.AppError) (*TenderD
 }
 
 func NewTenderDbModelsList(rows *sql.Rows) ([]*TenderDbModel, *errors.AppError) {
-	var modelsList []*TenderDbModel
+	modelsList := make([]*TenderDbModel, 0)
 	for rows.Next() {
 		model, err := NewTenderDbModel(rows, errors.DatabaseError)
 		if err != nil {
@@ -88,7 +88,7 @@ func NewTenderDtoModel(dbModel *TenderDbModel) *TenderDtoModel {
 }
 
 func NewTenderDtoModelsList(dbModels []*TenderDbModel) []*TenderDtoModel {
-	var dtoModelsList []*TenderDtoModel
+	dtoModelsList := make([]*TenderDtoModel, 0)
 	for _, dbModel := range dbModels {
 		dtoModelsList = append(dtoModelsList, NewTenderDtoModel(dbModel))
 	}

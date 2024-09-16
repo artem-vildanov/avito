@@ -8,10 +8,12 @@ const (
 	TenderStatusClosed    TenderStatus = "Closed"
 )
 
-var TenderStatusesList = []string{
-	string(TenderStatusCreated),
-	string(TenderStatusPublished),
-	string(TenderStatusClosed),
+func GetTenderStatuses() []TenderStatus {
+	return []TenderStatus{
+		TenderStatusCreated,
+		TenderStatusPublished,
+		TenderStatusClosed,
+	}
 }
 
 type BidStatus string
@@ -23,10 +25,12 @@ const (
 	BidStatusApproved  BidStatus = "Approved"
 )
 
-var BidStatusesList = []string{
-	string(BidStatusCreated),
-	string(BidStatusPublished),
-	string(BidStatusCanceled),
+func GetBidStatuses() []BidStatus {
+	return []BidStatus{
+		BidStatusCreated,
+		BidStatusPublished,
+		BidStatusCanceled,
+	}
 }
 
 type Decision string
@@ -36,7 +40,9 @@ const (
 	DecisionRejected Decision = "Rejected"
 )
 
-var DecisionsList = []string{
-	string(DecisionApproved),
-	string(DecisionRejected),
+func GetDecisions() []Decision {
+	return []Decision{
+		DecisionApproved,
+		DecisionRejected,
+	}
 }

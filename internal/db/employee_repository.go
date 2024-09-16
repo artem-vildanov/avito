@@ -13,19 +13,19 @@ func NewEmployeeRepository(storage *PostgresStorage) *EmployeeRepository {
 	return &EmployeeRepository{*storage}
 }
 
-func (self EmployeeRepository) GetEmployeeById(id string) (*models.EmployeeDbModel, *errors.AppError) {
-	row := self.Database.QueryRow("SELECT * FROM employee WHERE id = $1 limit 1;", id)
+func (r EmployeeRepository) GetEmployeeById(id string) (*models.EmployeeDbModel, *errors.AppError) {
+	row := r.Database.QueryRow("SELECT * FROM employee WHERE id = $1 limit 1;", id)
 	return models.NewEmployeeDbModel(row, errors.EmployeeNotFoundById(id))
 }
 
-func (self EmployeeRepository) GetEmployeeByUsername(username string) (*models.EmployeeDbModel, *errors.AppError) {
-	row := self.Database.QueryRow("SELECT * FROM employee WHERE username = $1", username)
+func (r EmployeeRepository) GetEmployeeByUsername(username string) (*models.EmployeeDbModel, *errors.AppError) {
+	row := r.Database.QueryRow("SELECT * FROM employee WHERE username = $1", username)
 	return models.NewEmployeeDbModel(row, errors.EmployeeNotFoundByUsername(username))
 }
 
-func (self EmployeeRepository) CheckEmployeeExistsById(id string) *errors.AppError {
+func (r EmployeeRepository) CheckEmployeeExistsById(id string) *errors.AppError {
 	var userExists bool
-	err := self.Database.QueryRow(
+	err := r.Database.QueryRow(
 		`SELECT EXISTS (
 			SELECT 1 FROM employee WHERE id = $1
 		)`,
@@ -40,9 +40,9 @@ func (self EmployeeRepository) CheckEmployeeExistsById(id string) *errors.AppErr
 	return nil
 }
 
-func (self EmployeeRepository) CheckEmployeeExistsByUsername(username string) *errors.AppError {
+func (r EmployeeRepository) CheckEmployeeExistsByUsername(username string) *errors.AppError {
 	var userExists bool
-	err := self.Database.QueryRow(
+	err := r.Database.QueryRow(
 		`SELECT EXISTS (
 			SELECT 1 FROM employee WHERE username = $1
 		)`,
@@ -57,9 +57,9 @@ func (self EmployeeRepository) CheckEmployeeExistsByUsername(username string) *e
 	return nil
 }
 
-func (self EmployeeRepository) CheckEmployeeIsResponsible(username, organizationId string) *errors.AppError {
+func (r EmployeeRepository) CheckEmployeeIsResponsible(username, organizationId string) *errors.AppError {
 	var isResponsible bool
-	err := self.Database.QueryRow(
+	err := r.Database.QueryRow(
 		`SELECT EXISTS (
 			SELECT 1
 			FROM employee
@@ -79,9 +79,9 @@ func (self EmployeeRepository) CheckEmployeeIsResponsible(username, organization
 	return nil
 }
 
-func (self EmployeeRepository) CheckEmployeeHasBidsForTender(employeeId, tenderId string) *errors.AppError {
+func (r EmployeeRepository) CheckEmployeeHasBidsForTender(employeeId, tenderId string) *errors.AppError {
 	var hasBids bool
-	err := self.Database.QueryRow(
+	err := r.Database.QueryRow(
 		`SELECT EXISTS (
 			SELECT 1 FROM bid WHERE author_id = $1 and tender_id = $2
 		)`,

@@ -40,7 +40,7 @@ func NewBidDbModel(row utils.Scannable, returnErr *errors.AppError) (*BidDbModel
 }
 
 func NewBidDbModelsList(rows *sql.Rows) ([]*BidDbModel, *errors.AppError) {
-	var modelsList []*BidDbModel
+	modelsList := make([]*BidDbModel, 0)
 	for rows.Next() {
 		model, err := NewBidDbModel(rows, errors.DatabaseError)
 		if err != nil {
@@ -87,7 +87,7 @@ func NewBidDtoModel(dbModel *BidDbModel) *BidDtoModel {
 }
 
 func NewBidDtoModelsList(dbModels []*BidDbModel) []*BidDtoModel {
-	var modelsList []*BidDtoModel
+	modelsList := make([]*BidDtoModel, 0)
 	for _, dbModel := range dbModels {
 		modelsList = append(modelsList, NewBidDtoModel(dbModel))
 	}
